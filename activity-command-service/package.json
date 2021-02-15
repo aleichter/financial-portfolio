@@ -1,0 +1,17 @@
+{
+  "name": "activity-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "@eventstore/db-client": "0.0.0-alpha.17",
+    "@grpc/grpc-js": "^1.2.7",
+    "@grpc/proto-loader": "^0.5.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

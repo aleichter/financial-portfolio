@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package portfolio;
+
+service ActivityCommand {
+    rpc AddActivityCommand (Activity) returns (CommandStatus) {}
+}
+
+message Activity {
+    string account = 1;
+    int32 settlementDate = 2;
+    string transactionType = 3;
+    string description = 4;
+    string assetid = 5;
+    int32 quantity = 6;
+    int32 price = 7;
+    int64 netamount = 8;
+}
+
+message CommandStatus {
+    string status = 1;
+}
