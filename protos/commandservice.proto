@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package portfolio;
+
+service AccountCommand {
+    rpc AddActivityCommand (Activity) returns (CommandResponse) {}
+    rpc CreateAccount (Account) returns (CommandResponse) {}
+}
+
+service AssetCommand {
+    rpc AddAssetCommand (Activity) returns (CommandResponse) {}
+}
+
+message Asset {
+    string securityId = 1;
+}
+
+message Account {
+    string account = 1;
+}
+
+message Activity {
+    string account = 1;
+    int32 settlementDate = 2;
+    string transactionType = 3;
+    string description = 4;
+    string securityId = 5;
+    int32 quantity = 6;
+    int32 price = 7;
+    int64 netamount = 8;
+}
+
+message CommandResponse {
+    bool success = 1;
+    string message = 2;
+}

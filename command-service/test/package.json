@@ -1,0 +1,21 @@
+{
+  "name": "activity-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "@aleichter/grpc-server": "1.1.0",
+    "@eventstore/db-client": "0.0.0-alpha.17",
+    "@grpc/grpc-js": "^1.2.7",
+    "@grpc/proto-loader": "^0.5.6",
+    "config": "^3.3.3"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC"
+}

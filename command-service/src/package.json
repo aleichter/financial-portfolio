@@ -1,0 +1,25 @@
+{
+  "name": "activity-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "@eventstore/db-client": "0.0.0-alpha.17",
+    "@grpc/grpc-js": "^1.2.7",
+    "@grpc/proto-loader": "^0.5.6",
+    "config": "^3.3.3",
+    "immutable": "^4.0.0-rc.12",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3"
+  },
+  "scripts": {
+    "test": "jest --coverage --detectOpenHandles"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "author": "",
+  "license": "ISC"
+}
