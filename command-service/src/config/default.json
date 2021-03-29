@@ -5,6 +5,7 @@
         "proto" : "/Users/andrew/git/financial-portfolio/protos/commandservice.proto"
     },
     "esdbConfig" : {
-        "connection" : "esdb://localhost:2113?tls=false"
+        "connection" : "esdb://localhost:2113?tls=false",
+        "snapshotTrigger" : 100
     }
 }

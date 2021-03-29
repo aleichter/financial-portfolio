@@ -1,5 +1,6 @@
-const { START } = require('@eventstore/db-client');
+const { START, WrongExpectedVersionError } = require('@eventstore/db-client');
 const esdb = require('@eventstore/db-client')
+const { WrongExpectedVersion } = require("../model/exception/domain-exceptions");
 
 class ESDB {
 
@@ -9,16 +10,27 @@ class ESDB {
     }
 
     createStreamWithAppend(stream, data, type) {
-        return this.appendToStream(stream, data, type, { expectedRevision: esdb.NO_STREAM });
+        return this.appendToStream(stream, data, type, esdb.NO_STREAM);
     }
 
-    appendToStream(stream, data, type, writeOptions = { expectedRevision: esdb.STREAM_EXISTS }) {
+    appendToStream(stream, data, type, expectedRevision = null) {
         var event = {
             type: type,
             data: data
         }
         var jsonEvent = esdb.jsonEvent(event);
-        return this.client.appendToStream(stream, jsonEvent, writeOptions);
+        var writeOptions = { expectedRevision: esdb.STREAM_EXISTS };
+        if(expectedRevision != null) {
+            writeOptions = { expectedRevision: expectedRevision };
+        }
+        return this.client.appendToStream(stream, jsonEvent, writeOptions)
+            .catch((err) => {
+                if(err instanceof WrongExpectedVersionError) {
+                    throw new WrongExpectedVersion(err.expectedVersion, err.actualVersion);
+                } else {
+                    throw err;
+                }
+            });
     }
 
     subscribeToAll() {
@@ -29,10 +41,13 @@ class ESDB {
         return this.client.subscribeToStream(stream, {fromRevision: esdb.START});
     }
 
-    readStream(stream) {
+    readStream(stream, fromRevision = null) {
+        if(fromRevision == null) {
+            fromRevision = esdb.START;
+        }
         return this.client.readStream(stream, {
                     direction: esdb.FORWARDS,
-                    fromRevision: esdb.START,
+                    fromRevision: fromRevision,
                     maxCount: 200,
                 });
     }

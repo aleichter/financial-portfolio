@@ -1,33 +1,68 @@
 const { v4: uuidv4 } = require('uuid');
-const { Map } = require("immutable");
+const { Map, fromJS } = require("immutable");
 const { EVENT_TYPE, apply } = require("./portfolio-event-processor");
 
 class PortfolioEventService {
     #dbclient;
     #streamPrefix = "portfolio-";
+    #snapshotStreamPostfix = "-snapshot";
+    #snapshotTrigger;
 
-    constructor(dbclient) {
+    constructor(dbclient, snapshotTrigger = 100) {
         this.#dbclient = dbclient;
+        this.#snapshotTrigger = snapshotTrigger;
     }
 
-    save(event) {
+    save(event, expectedRevision = null) {
         var result = null;            
-        var streamName = this.#streamPrefix + event.get("portfolioId");
-        var eventType = event.get("eventType");
+        const stream = this.#streamPrefix + event.get("portfolioId");
+        const snapshotStream = stream + this.#snapshotStreamPostfix;
+        const eventType = event.get("eventType");
+        var writeFunction = () => {
+            return this.#dbclient.appendToStream(stream, event.toJS(), eventType, expectedRevision);
+        };
         if(eventType == EVENT_TYPE.PORTFOLIO_CREATED) {
-            result = this.#dbclient.createStreamWithAppend(streamName, event.toJS(), eventType)
-        } else {
-            result = this.#dbclient.appendToStream(streamName, event.toJS(), eventType);
+            writeFunction = () => {
+                const formattedEvent = {
+                    event: {
+                        type: eventType,
+                        data: event.toJS(),
+                        revision: 0n
+                    }
+                }
+                const initialState = [formattedEvent].reduce(apply, null);
+
+                return this.#dbclient.createStreamWithAppend(snapshotStream, initialState.toJS(), EVENT_TYPE.SNAPSHOT_CREATED).then(async (r) => {
+                    return await this.#dbclient.createStreamWithAppend(stream, event.toJS(), eventType)
+                });
+            };
         }
-        return result;
+        return writeFunction();
     }
 
     load(portfolioId) {
-        var stream = this.#streamPrefix + portfolioId;
-        return this.#dbclient.readStream(stream)
-            .then((events) => {
-                return Map(events.reduce(apply, null));
-            });
+        const stream = this.#streamPrefix + portfolioId;
+        const snapshotStream = stream + this.#snapshotStreamPostfix;
+        return new Promise(async (resolve, reject) => {
+            try {
+                const events = await this.#dbclient.readStreamLastEvent(snapshotStream);
+                const portfolioState = fromJS(events[0].event.data);
+                const expectedRevision = events[0].event.revision;
+                const fromRevision = BigInt(portfolioState.get("revisionNumber")) + 1n;
+                const readResult = await this.#dbclient.readStream(stream, fromRevision)
+                    .then(async (events) => {
+                        const newPortfolioState = events.reduce(apply, portfolioState);
+                        if (events.length >= this.#snapshotTrigger) {
+                            //Create a new snapshot
+                            await this.#dbclient.appendToStream(snapshotStream, newPortfolioState.toJS(), EVENT_TYPE.SNAPSHOT_CREATED, expectedRevision);
+                        }
+                        return newPortfolioState;
+                    });
+                resolve(readResult);
+            } catch(err) {
+                reject(err);
+            }
+        });
     }
 
     delete(portfolioId) {
@@ -71,15 +106,15 @@ class PortfolioEventService {
     }
 
     static securitySold(portfolioId, accountId, securityId, quantity, cashAmount, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECUIRTY_SOLD });
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SOLD });
     }
 
-    static securityTransferedIn(portfolioId, accountId, securityId, quantity, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERED_IN });
+    static securityTransferredIn(portfolioId, accountId, securityId, quantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERRED_IN });
     }
 
-    static securityTransferedOut(portfolioId, accountId, securityId, quantity, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERED_OUT });
+    static securityTransferredOut(portfolioId, accountId, securityId, quantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERRED_OUT });
     }
 }
 

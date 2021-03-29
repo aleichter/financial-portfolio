@@ -1,7 +1,8 @@
 const PortfolioEventService = require("../service/portfolio-event-service");
 const ESDB = require("../db/esdb");
 const { Map } = require("immutable");
-const { AccountUpdateException, SecurityDoesNotExistException } = require("../model/exception/domain-exceptions");
+const PortfolioBuilder = require("../model/portfolio-state-builder");
+const { apply } = require("../service/portfolio-event-processor");
 
 describe("Test suite for PortolioEventService and event processor", () => {
     test("Test PortolioEventService portfolioCrated()", async () => {
@@ -58,7 +59,7 @@ describe("Test suite for PortolioEventService and event processor", () => {
         return eventService.delete(portfolioId);
     });
 
-    test("Test PortolioEventService ACCOUNT_UPDATED exception in processing", async () => {
+    test("Test PortolioEventService ACCOUNT_UPDATED when no ACCOUNT_ADDED", async () => {
         const accountNumber =  "0123456789";
         const updatedAccountNumber = "0987654321";
         const createdEvent = PortfolioEventService.portfolioCreated();
@@ -69,12 +70,12 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
         await eventService.save(createdEvent);
-        //Update account without saving the accountAdded event.  Should throw AccountUpdateException on load
+        //Update account without saving the accountAdded event.  Should behave same as accountAdded.
         await eventService.save(accountUpdated);
 
-        expect(eventService.load(portfolioId))
-            .rejects
-            .toThrow(AccountUpdateException);
+        portfolioState = (await eventService.load(portfolioId)).toJS();
+        expect(portfolioState.accounts[0].accountId).toEqual(accountAdded.get("accountId"));
+        expect(portfolioState.accounts[0].accountNumber).toEqual(updatedAccountNumber);
    
         return eventService.delete(portfolioId);
     });
@@ -258,24 +259,24 @@ describe("Test suite for PortolioEventService and event processor", () => {
         expect(portfolioState.get("accounts").get(0).get("cashAmount")).toEqual("1000000");
     });
 
-    test("Test PortolioEventService with SECURITY_TRANSFERED_IN and SECURITY_TRANSFERED_OUT", async () => {
+    test("Test PortolioEventService with SECURITY_TRANSFERRED_IN and SECURITY_TRANSFERRED_OUT", async () => {
         const accountNumber =  "0123456789";
         const securityId = "APPL";
         const quantity = "1000";
-        const quanityTransferedOut = "500";
+        const quantityTransferredOut = "500";
         const createdEvent = PortfolioEventService.portfolioCreated();
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityTransferedIn = PortfolioEventService.securityTransferedIn(portfolioId, accountId, securityId, quantity);
-        const securityTransferedOut = PortfolioEventService.securityTransferedOut(portfolioId, accountId, securityId, quanityTransferedOut);
+        const securityTransferredIn = PortfolioEventService.securityTransferredIn(portfolioId, accountId, securityId, quantity);
+        const securityTransferredOut = PortfolioEventService.securityTransferredOut(portfolioId, accountId, securityId, quantityTransferredOut);
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
         await eventService.save(createdEvent);
         await eventService.save(accountAdded);
-        await eventService.save(securityTransferedIn);
-        await eventService.save(securityTransferedOut);
+        await eventService.save(securityTransferredIn);
+        await eventService.save(securityTransferredOut);
 
         const portfolioState = await eventService.load(portfolioId);
         expect(portfolioState.get("portfolioId")).toEqual(portfolioId);
@@ -337,11 +338,9 @@ describe("Test suite for PortolioEventService and event processor", () => {
         expect(BigInt(portfolioState.get("accounts").get(0).get("accountSecurities").get(0).get("quantity"))).toEqual(BigInt(quantity) + BigInt(quantityAdditional));
     });
 
-    test("Test PortolioEventService with securitySold with no securityBought throw Exception", async () => {
+    test("Test PortolioEventService with securitySold with no securityBought", async () => {
         const accountNumber =  "0123456789";
         const securityId = "APPL";
-        const quantity = "1000";
-        const cashAmount = "2000000";
         const quantitySold = "500";
         const cashAmountSold = "1000000"
         const createdEvent = PortfolioEventService.portfolioCreated();
@@ -356,26 +355,79 @@ describe("Test suite for PortolioEventService and event processor", () => {
         await eventService.save(accountAdded);
         await eventService.save(securitySold);
 
-        return expect(eventService.load(portfolioId)).rejects.toThrow(SecurityDoesNotExistException);
+        const portfolioState = await eventService.load(portfolioId);
+        expect(portfolioState.get("accounts").get(0).get("cashAmount")).toEqual(cashAmountSold);
+        expect(portfolioState.get("accounts").get(0).get("accountSecurities").get(0).get("securityId")).toEqual(securityId);
+        expect(portfolioState.get("accounts").get(0).get("accountSecurities").get(0).get("quantity")).toEqual((BigInt(quantitySold) * -1n).toString());
     });
 
-    test("Test PortolioEventService with SECURITY_TRANSFERED_OUT without SECURITY_TRANSFERED_IN throws Exception", async () => {
+    test("Test PortolioEventService with SECURITY_TRANSFERED_OUT without SECURITY_TRANSFERED_IN", async () => {
         const accountNumber =  "0123456789";
         const securityId = "APPL";
-        const quantity = "1000";
-        const quanityTransferedOut = "500";
+        const quantityTransferredOut = "500";
         const createdEvent = PortfolioEventService.portfolioCreated();
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityTransferedOut = PortfolioEventService.securityTransferedOut(portfolioId, accountId, securityId, quanityTransferedOut);
+        const securityTransferredOut = PortfolioEventService.securityTransferredOut(portfolioId, accountId, securityId, quantityTransferredOut);
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
         await eventService.save(createdEvent);
         await eventService.save(accountAdded);
-        await eventService.save(securityTransferedOut);
+        await eventService.save(securityTransferredOut);
 
-        return expect(eventService.load(portfolioId)).rejects.toThrow(SecurityDoesNotExistException);
+        const portfolioState = await eventService.load(portfolioId);
+        expect(portfolioState.get("accounts").get(0).get("accountSecurities").get(0).get("securityId")).toEqual(securityId);
+        expect(portfolioState.get("accounts").get(0).get("accountSecurities").get(0).get("quantity")).toEqual((BigInt(quantityTransferredOut) * -1n).toString());
+    });
+
+    test("Test PortfolioEventService testing applying events with and without a starting state value", async () => {
+        const accountNumber =  "0123456789";
+        const cashAmountDeposited = "10000000";
+        const cashAmountWithdrawn = "1000000";
+
+        const eventFormat = (data, revision) => {
+            return {
+                event: {
+                    type: data.eventType,
+                    data: data,
+                    revision: revision
+                }
+            }
+        }
+        const portfolioCreatedEvent = PortfolioEventService.portfolioCreated();
+        const portfolioId = portfolioCreatedEvent.get("portfolioId");
+        const accountAddedEvent = PortfolioEventService.accountAdded(portfolioId, accountNumber);
+        const accountId = accountAddedEvent.get('accountId');
+        const cashDepositedEvent = PortfolioEventService.cashDeposited(portfolioId, accountId, cashAmountDeposited);
+        const cashWithdrawnEvent = PortfolioEventService.cashWithdrawn(portfolioId, accountId, cashAmountWithdrawn);
+        const securityBoughtEvent = PortfolioEventService.securityBought(portfolioId, accountId, "APPL", "100", "1000000", "03/28/2021");
+
+        const events = [
+            eventFormat(portfolioCreatedEvent.toJS(), 0n), 
+            eventFormat(accountAddedEvent.toJS(), 1n), 
+            eventFormat(cashDepositedEvent.toJS(), 2n), 
+            eventFormat(cashWithdrawnEvent.toJS(), 3n)
+        ];
+
+        const portfolioState = events.reduce(apply, null);
+
+        const events2 = [
+            eventFormat(securityBoughtEvent.toJS(), 4n)
+        ];
+
+        const portfolioState2 = events2.reduce(apply, portfolioState);
+
+        const events3 = [
+            eventFormat(portfolioCreatedEvent.toJS(), 0n), 
+            eventFormat(accountAddedEvent.toJS(), 1n), 
+            eventFormat(cashDepositedEvent.toJS(), 2n), 
+            eventFormat(cashWithdrawnEvent.toJS(), 3n),
+            eventFormat(securityBoughtEvent.toJS(), 4n)
+        ];
+        
+        const portfolioState3 = events3.reduce(apply, null);
+        expect(portfolioState3.toJS()).toMatchObject(portfolioState2.toJS());
     });
 });

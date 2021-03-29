@@ -9,6 +9,7 @@
     "@grpc/proto-loader": "^0.5.6",
     "config": "^3.3.3",
     "immutable": "^4.0.0-rc.12",
+    "moment": "^2.29.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

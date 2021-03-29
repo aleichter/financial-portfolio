@@ -2,8 +2,12 @@ const PortfolioBuilder = require("../model/portfolio-state-builder");
 
 describe("Portfolio test", () => {
     test("PortolioState Test", () => {
-        let portfolio = PortfolioBuilder.build("123");
+        let portfolio = PortfolioBuilder.build("123", 0n);
         expect(portfolio.get("portfolioId")).toEqual("123");
+        expect(portfolio.get("revisionNumber")).toEqual(0n);
+
+        portfolio = PortfolioBuilder.updateRevision(portfolio, 1n);
+        expect(portfolio.get("revisionNumber")).toEqual(1n);
 
         let account = PortfolioBuilder.AccountBuilder.build("1001","2001");
         portfolio = PortfolioBuilder.updateOrAddAccount(portfolio, account);
@@ -19,6 +23,9 @@ describe("Portfolio test", () => {
         portfolio = PortfolioBuilder.updateOrAddAccount(portfolio, account);
         expect(portfolio.get("accounts").get(1).get("accountId")).toEqual("2001");
         expect(portfolio.get("accounts").get(1).get("accountNumber")).toEqual("4001");
+
+        portfolio = PortfolioBuilder.removeAccount(portfolio, account.get("accountId"));
+        expect(portfolio.get("accounts").size).toEqual(1);
 
         let accountSecurity = PortfolioBuilder.AccountSecurityBuilder.build("APPL", "10000");
         account = PortfolioBuilder.getAccount(portfolio, "1001");
@@ -49,7 +56,5 @@ describe("Portfolio test", () => {
         let cashAmount = BigInt(account.get("cashAmount")) + 1000n;
         account = PortfolioBuilder.AccountBuilder.updateCashAmount(account, cashAmount.toString());
         expect(account.get("cashAmount")).toEqual("1000");
-
-        
     });    
 });

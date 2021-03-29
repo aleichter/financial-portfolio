@@ -8,6 +8,7 @@
     An example of the portfolio state object is described here:
     {
         portfolioId: "123U-3432-83UD-1JF9",
+        revisionNumber: 0n,
         accounts: [
             {
                 accountId: "838J-48JD-JF82-19IS",
@@ -30,8 +31,8 @@
 const { Map, List, Seq } = require("immutable");
 
 class PortfolioBuilder {
-    static build(portfolioId) {
-         return Map({ portfolioId: portfolioId, accounts:List([]) });
+    static build(portfolioId, revisionNumber) {
+         return Map({ portfolioId: portfolioId, revisionNumber: revisionNumber, accounts:List([]) });
     }
 
     static getAccount(portfolio, accountId) {
@@ -46,6 +47,11 @@ class PortfolioBuilder {
         }
         return portfolio.set("accounts", accounts.set(i, account));
     }
+
+    static updateRevision(portfolio, newRevisionNumber) {
+        return portfolio.set("revisionNumber", newRevisionNumber);
+    }
+
     static removeAccount(portfolio, accountId) {
         var accounts = List(Seq(portfolio.get("accounts")).filter(a => a.get("accountId") != accountId));
         var newPortfolio = portfolio.toJS();
