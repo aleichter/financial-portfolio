@@ -1,6 +1,11 @@
-const ESDB = require('../db/esdb.js')
+var ESDB = require('../db/esdb.js')
+const config = require('config');
+const { WrongExpectedVersion } = require('../model/exception/domain-exceptions');
 
-//jest.mock('../db/esdb')
+jest.mock('../db/esdb');
+if(config.hasOwnProperty("testConfig") && config.testConfig.hasOwnProperty("unmockAll") && config.testConfig.unmockAll) {
+    ESDB = jest.requireActual('../db/esdb');
+}
 
 const isPromise = (promise) => {  
     return !!promise && typeof promise.then === 'function'
@@ -46,6 +51,25 @@ describe("Test suite for the ESDB module", () => {
 
         let events = await dbclient.readStream(stream);
         expect(events.length).toBe(2);
+    });
+
+    test("Test case for appendToStream WrongExpectedVersion", async () => {
+        let stream = "test_1";
+        let data = {
+            id: "test1",
+            message: "Test Message"
+        };
+        let type = "TestEvent"
+
+        var r = await dbclient.createStreamWithAppend(stream, data, type)
+
+        let data2 = {
+            id: "test2",
+            message: "Test Message 2"
+        };
+
+        return expect(dbclient.appendToStream(stream, data2, type, BigInt(r.nextExpectedRevision) + 1n))
+            .rejects.toThrow(WrongExpectedVersion);
     });
 
     test("Test case for readStreamLastEvent", async () => {

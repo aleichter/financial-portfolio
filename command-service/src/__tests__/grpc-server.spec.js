@@ -8,7 +8,6 @@ const grpcConfig = {
 }
 
 const records = [];
-//TODO:  Figure out how to mock GrpcServer and GrpcClient
 const serverSetup = () => {
             
     var host = grpcConfig.bindAddress;

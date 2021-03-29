@@ -17,6 +17,33 @@ At some point over the last two years I became fascinated with EventSourcing.  I
 ### Exception are not very readable nor expressive #functionalProgramming #tdd
 3.29.2021 - One thing I noticed when re-reading the code is that exception handling via the try catch throw pattern is not very expressive about possibilities or intention.  My personal pattern is to catch exceptions at the top of the call stack.  In this case I plan on catching all exceptions in the controller.  When building my test cases this becomes a little bit problematic for me in terms of expressiveness.  The controller is part of the I/O utility stack and therefore is not in the business logic stack.  My unit tests are focused to validate the business logic.  No where in the method signatures of my classes does it indicate where exceptions are thrown.  Even if it did it is not clear how each class in the call stack might be effected by a thrown exception.  A bit of research on this high-lighted the Either pattern (I like this blog post on it: https://www.thoughtworks.com/insights/blog/either-data-type-alternative-throwing-exceptions).  I had become aware of this pattern without realizing it while learning golang. I will attempt to use the Either pattern for error handling in my node.js refactor.
 
+### Control mocking via environment variable #tdd
+3.29.2021 - Jest controls mocks by placing the mock object in the __mocks__ directory of the directory which the mock target exists.  In this case esdb.js is in the db directory so the structure looks like this:
+
+> ./db/esdb.js<br>
+> ./db/__mocks__/esdb.js
+
+In my test case file I put the following code:
+    jest.mock('../db/esdb')
+This line tells Jest to use the mock implementation of esdb rather than the real implementation of esdb.  What I have been doing is commenting out the the jest.mock() line while developing so that my test cases execute against my real local implementation of EventStore. What I want to do is make this a switchable option so that I do not have to comment out all jest.mock lines when I want to switch from the mock implementation rather than the real implementation.  Unfortunately, but rightly so, Jest validates all cli inputs.  So it is not easy to use a command line switch.  Something like the following would be nice:
+
+    npm test --unmockAll
+
+I did see a blog post showing how to do this but it seemed like a lot of work to achieve when using an environment variable achieves the same goal and is a lot less work.  What I did instead was add the following the test.json file in my config directory.
+
+        "testConfig" : {
+        "unmockAll": false
+    }
+
+Then change the const ESDB = require() to var ESDB = require() and add the following lines after the jest.mock
+    
+    jest.mock('../db/esdb');
+    if(config.hasOwnProperty("testConfig") && config.testConfig.hasOwnProperty("unmockAll") && config.testConfig.unmockAll) {
+        ESDB = jest.requireActual('../db/esdb');
+    }
+
+Yes, getting this mock setup and working correctly has a lot of work and it feels unnecessary.  I'm quite convinced that I will be able to refactor this project to not have to use mocks for I/O utilities like EventStore or Grpc.  Those are well tested and well supported software packages so no need to include them in my unit tests.
+
 ### <a name="footnotes"></a>Footnotes:
 1. GOTO 2017 • The Many Meanings of Event-Driven Architecture • Martin Fowler - https://www.youtube.com/watch?v=STKCRSUsyP0
 

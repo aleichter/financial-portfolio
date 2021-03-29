@@ -45,16 +45,16 @@ class PortfolioEventService {
         const snapshotStream = stream + this.#snapshotStreamPostfix;
         return new Promise(async (resolve, reject) => {
             try {
-                const events = await this.#dbclient.readStreamLastEvent(snapshotStream);
-                const portfolioState = fromJS(events[0].event.data);
-                const expectedRevision = events[0].event.revision;
+                const snapshotEvents = await this.#dbclient.readStreamLastEvent(snapshotStream);
+                const portfolioState = fromJS(snapshotEvents[0].event.data);
+                const snapshotExpectedRevision = snapshotEvents[0].event.revision;
                 const fromRevision = BigInt(portfolioState.get("revisionNumber")) + 1n;
                 const readResult = await this.#dbclient.readStream(stream, fromRevision)
                     .then(async (events) => {
                         const newPortfolioState = events.reduce(apply, portfolioState);
                         if (events.length >= this.#snapshotTrigger) {
                             //Create a new snapshot
-                            await this.#dbclient.appendToStream(snapshotStream, newPortfolioState.toJS(), EVENT_TYPE.SNAPSHOT_CREATED, expectedRevision);
+                            await this.#dbclient.appendToStream(snapshotStream, newPortfolioState.toJS(), EVENT_TYPE.SNAPSHOT_CREATED, snapshotExpectedRevision);
                         }
                         return newPortfolioState;
                     });

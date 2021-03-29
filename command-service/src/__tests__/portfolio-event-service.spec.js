@@ -1,8 +1,14 @@
 const PortfolioEventService = require("../service/portfolio-event-service");
-const ESDB = require("../db/esdb");
+var ESDB = require("../db/esdb");
+const config = require('config');
 const { Map } = require("immutable");
 const PortfolioBuilder = require("../model/portfolio-state-builder");
 const { apply } = require("../service/portfolio-event-processor");
+
+jest.mock('../db/esdb');
+if(config.hasOwnProperty("testConfig") && config.testConfig.hasOwnProperty("unmockAll") && config.testConfig.unmockAll) {
+    ESDB = jest.requireActual('../db/esdb');
+}
 
 describe("Test suite for PortolioEventService and event processor", () => {
     test("Test PortolioEventService portfolioCrated()", async () => {

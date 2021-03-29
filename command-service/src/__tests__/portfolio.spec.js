@@ -1,10 +1,16 @@
 const Portfolio = require("../model/portfolio.js");
-const ESDB = require("../db/esdb.js");
+var ESDB = require("../db/esdb.js");
+const config = require('config');
 const { InvalidSettlementDate, SecurityDoesNotExistException, 
         NegativeSecurityQuantityException, WrongExpectedVersion, AccountDoesNotExist
         } = require("../model/exception/domain-exceptions.js");
 
 const UUID_REGEX = new RegExp("^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$");
+
+jest.mock('../db/esdb');
+if(config.hasOwnProperty("testConfig") && config.testConfig.hasOwnProperty("unmockAll") && config.testConfig.unmockAll) {
+    ESDB = jest.requireActual('../db/esdb');
+}
 
 describe("Test suite for Portfolio", () => {
 

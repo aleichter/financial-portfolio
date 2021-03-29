@@ -43,7 +43,6 @@ class GrpcServer{
             });
         
         var packageDef = grpc.loadPackageDefinition(packageDefinition)
-        //TODO: Need to test for case where multiple packages exist in proto file
         this.proto = packageDef[Object.keys(packageDef)[0]]
         this.serviceImplMap = this.__getServiceImplMap(this.proto);
         if(routeMap != null) {
