@@ -1,8 +1,7 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const config = require('config'); 
-
-
+const logger = require("../logging/portfolio-logger");
 const __routeMap = {}
 
 
@@ -11,18 +10,29 @@ const isPromise = (promise) => {
 }
 const wrapper = (call, callback) => {
     try {
+        logger.debug("Request data: " + JSON.stringify(call.request));
+        logger.debug("Handler: " + call.call.handler.path);
+        const hrstart = process.hrtime();
         var result = __routeMap[call.call.handler.path](call.request);
         if(isPromise(result)) {
             result.then((data) => {
+                const hrend = process.hrtime(hrstart);
+                logger.debug('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+                logger.debug("Response data: " + JSON.stringify(data));
                 callback(null, data)
             }).catch((err) => {
+                logger.error(err);
                 callback({code: grpc.status.INTERNAL, message: err})
             });
         } else {
+            const hrend = process.hrtime(hrstart);
+            logger.debug('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+            logger.debug("Response data: " + JSON.stringify(result));
             callback(null, result);
         }
     }
     catch(err) {
+        logger.error(err);
         callback({code: grpc.status.INTERNAL, message: err});
     }
   }
@@ -87,6 +97,7 @@ class GrpcServer{
             this.server.bindAsync(this.bindAddress + ':' + this.port, grpc.ServerCredentials.createInsecure(), (err, port) => {
                 if(!err) {
                     this.server.start();
+                    logger.info("gRPC Server listening at " + this.bindAddress + ":" + this.port + " ...");
                     resolve();
                 } else {
                     reject(err);

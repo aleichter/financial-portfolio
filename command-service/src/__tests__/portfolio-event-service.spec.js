@@ -16,10 +16,10 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
-        const r = await eventService.save(createdEvent);
+        await eventService.save(createdEvent);
         const portfolioState = await eventService.load(portfolioId);
         expect(portfolioState.get("portfolioId")).toEqual(portfolioId);
-        return eventService.delete(portfolioId);
+        await eventService.delete(portfolioId);
     });
 
     test("Test PortolioEventService accountAdded()", async () => {

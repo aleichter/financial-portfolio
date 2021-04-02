@@ -2,35 +2,117 @@ syntax = "proto3";
 
 package portfolio;
 
-service AccountCommand {
-    rpc AddActivityCommand (Activity) returns (CommandResponse) {}
-    rpc CreateAccount (Account) returns (CommandResponse) {}
+service PortfolioService {
+    rpc CreatePortfolio (CreatePortfolioRequest) returns (CreatePorfolioResponse) {}
+    rpc AddAccount (AddAccountRequest) returns (AddAccountResponse) {}
+    rpc UpdateAccount (UpdateAccountRequest) returns (NextExpectedRevisionResponse) {}
+    rpc DepositCash (CashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc WithdrawCash (CashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc PayFees (CashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc ReceiveDividend (CashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc BuySecurity (SecurityCashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc SellSecurity (SecurityCashAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc TransferSecurityIn (SecurityAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc TransferSecurityOut (SecurityAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc SplitSecurity (SecurityAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc ConsolidateSecurity (SecurityAdjustmentRequest) returns (NextExpectedRevisionResponse) {}
+    rpc MergeSecurity (MergeSecurityRequest) returns (NextExpectedRevisionResponse) {}
+    rpc SpinOffSecurity (SpinOffSecurityRequest) returns (NextExpectedRevisionResponse) {}
+    rpc GetPortfolioState (PortfolioStateRequest) returns (PortfolioStateResponse) {}
 }
 
-service AssetCommand {
-    rpc AddAssetCommand (Activity) returns (CommandResponse) {}
+message CreatePortfolioRequest {}
+message CreatePorfolioResponse {
+    string portfolioId = 1;
+    string nextExpectedRevision = 2;
 }
 
-message Asset {
-    string securityId = 1;
+message AddAccountRequest {
+    string portfolioId = 1;
+    string accountNumber = 2;
+    string expectedRevision = 3;
+}
+message AddAccountResponse {
+    string accountId = 1;
+    string nextExpectedRevision = 2;
+}
+
+message UpdateAccountRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string accountNumber = 3;
+    string expectedRevision = 4;
+}
+
+message NextExpectedRevisionResponse {
+    string nextExpectedRevision = 1;
+}
+message CashAdjustmentRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string cashAdjustment = 3;
+    string settlementDate = 4;
+    string expectedRevision = 5;
+}
+
+message SecurityCashAdjustmentRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string securityId = 3;
+    string cashAdjustment = 4;
+    string quantityAdjustment = 5;
+    string settlementDate = 6;
+    string expectedRevision = 7;
+}
+
+message SecurityAdjustmentRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string securityId = 3;
+    string quantityAdjustment = 4;
+    string settlementDate = 5;
+    string expectedRevision = 6;
+}
+
+message MergeSecurityRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string acquiredSecurityId = 3;
+    string acquiringSecurityId = 4;
+    string acquiredQuantity = 5;
+    string acquiringQuantity = 6;
+    string settlementDate = 7;
+    string expectedRevision = 8;
+}
+
+message SpinOffSecurityRequest {
+    string portfolioId = 1;
+    string accountId = 2;
+    string existingSecurityId = 3;
+    string newSecurityId = 4;
+    string newQuantity = 5;
+    string settlementDate = 6;
+    string expectedRevision = 7;
+}
+
+message PortfolioStateRequest {
+    string portfolioId = 1;
+}
+
+message PortfolioStateResponse {
+    string portfolioId = 1;
+    string revisionNumber = 2;
+    repeated Account accounts = 3;
 }
 
 message Account {
-    string account = 1;
+    string accountId = 1;
+    string accountNumber = 2;
+    string cashAmount = 3;
+    repeated AccountSecurity accountSecurities = 4;
 }
 
-message Activity {
-    string account = 1;
-    int32 settlementDate = 2;
-    string transactionType = 3;
-    string description = 4;
-    string securityId = 5;
-    int32 quantity = 6;
-    int32 price = 7;
-    int64 netamount = 8;
-}
-
-message CommandResponse {
-    bool success = 1;
-    string message = 2;
+message AccountSecurity {
+    string securityId = 1;
+    string quantity = 2;
 }

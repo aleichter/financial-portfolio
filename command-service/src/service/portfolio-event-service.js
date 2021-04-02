@@ -102,15 +102,37 @@ class PortfolioEventService {
     }
 
     static securityBought(portfolioId, accountId, securityId, quantity, cashAmount, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_BOUGHT });
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_BOUGHT });
     }
 
     static securitySold(portfolioId, accountId, securityId, quantity, cashAmount, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SOLD });
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SOLD });
     }
 
     static securityTransferredIn(portfolioId, accountId, securityId, quantity, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERRED_IN });
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_TRANSFERRED_IN });
+    }
+
+    static securitySplit(portfolioId, accountId, securityId, distributedQuantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, distributedQuantity: distributedQuantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SPLIT });
+    }
+
+    static securityConsolidated(portfolioId, accountId, securityId, consolidatedQuantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, consolidatedQuantity: consolidatedQuantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_CONSOLIDATED });
+    }
+
+    static securityMerged(portfolioId, accountId, acquiredSecurityId, acquiringSecurityId, 
+                            acquiredQuantity, acquiringQuantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, acquiredSecurityId: acquiredSecurityId, 
+                    acquiringSecurityId: acquiringSecurityId, acquiredQuantity: acquiredQuantity,
+                    acquiringQuantity: acquiringQuantity, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_MERGED });
+    }
+
+    static securitySpunOff(portfolioId, accountId, existingSecurityId, newSecurityId, 
+                            newQuantity, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, existingSecurityId: existingSecurityId, 
+                    newSecurityId: newSecurityId, newQuantity: newQuantity, settlementDate: settlementDate, 
+                    eventType: EVENT_TYPE.SECURITY_SPUNOFF });
     }
 
     static securityTransferredOut(portfolioId, accountId, securityId, quantity, settlementDate) {

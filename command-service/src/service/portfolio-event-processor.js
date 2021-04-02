@@ -24,6 +24,10 @@ const EVENT_TYPE = {
     CASH_WITHDRAWN : "CASH_WITHDRAWN",
     SECURITY_TRANSFERRED_IN : "SECURITY_TRANSFERRED_IN",
     SECURITY_TRANSFERRED_OUT : "SECURITY_TRANSFERRED_OUT",
+    SECURITY_SPLIT : "SECURITY_SPLIT",
+    SECURITY_CONSOLIDATED : "SECURITY_CONSOLIDATED",
+    SECURITY_MERGED : "SECURITY_MERGED",
+    SECURITY_SPUNOFF : "SECURITY_SPUNOFF",
     FEES_PAID : "FEES_PAID",
     DIVIDEND_RECEIVED : "DIVIDEND_RECEIVED",
     SNAPSHOT_CREATED : "SNAPSHOT_CREATED"
@@ -95,6 +99,25 @@ exports.apply = (accum, event) => {
             var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(updatedAccount, newSecurity);
             newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);     
             break;
+        case EVENT_TYPE.SECURITY_MERGED:
+            var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
+            var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
+            var acquiredSecurity = PortfolioBuilder.AccountBuilder.getAccountSecurity(account, event.event.data.acquiredSecurityId);
+
+            acquiredSecurity = subtractSecurityQuantity(account, event.event.data.acquiredQuantity, event.event.data.acquiredSecurityId);
+            account = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, acquiredSecurity);
+            
+            var newSecurity = PortfolioBuilder.AccountSecurityBuilder.build(event.event.data.acquiringSecurityId, event.event.data.acquiringQuantity);
+            var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, newSecurity);
+            newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);     
+            break;
+        case EVENT_TYPE.SECURITY_SPUNOFF:
+            var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
+            var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
+            var newSecurity = PortfolioBuilder.AccountSecurityBuilder.build(event.event.data.newSecurityId, event.event.data.newQuantity);
+            var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, newSecurity);
+            newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);     
+            break;
         case EVENT_TYPE.CASH_DEPOSITED:
         case EVENT_TYPE.DIVIDEND_RECEIVED:
             var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
@@ -111,6 +134,20 @@ exports.apply = (accum, event) => {
             var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
             var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
             var newSecurity = addSecurityQuantity(account, event.event.data.quantity, event.event.data.securityId);
+            var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, newSecurity);
+            newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);
+            break;
+        case EVENT_TYPE.SECURITY_SPLIT:
+            var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
+            var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
+            var newSecurity = addSecurityQuantity(account, event.event.data.distributedQuantity, event.event.data.securityId);
+            var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, newSecurity);
+            newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);
+            break;
+        case EVENT_TYPE.SECURITY_CONSOLIDATED:
+            var portfolioState = PortfolioBuilder.updateRevision(accum, revision);
+            var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
+            var newSecurity = subtractSecurityQuantity(account, event.event.data.consolidatedQuantity, event.event.data.securityId);
             var newUpdatedAccountSecurity = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(account, newSecurity);
             newAccum = PortfolioBuilder.updateOrAddAccount(portfolioState, newUpdatedAccountSecurity);
             break;

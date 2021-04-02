@@ -6,6 +6,9 @@ At some point over the last two years I became fascinated with EventSourcing.  I
 
 ## The Business Problem
 
+### Event Storm
+![Event Storm](./doc/images/EventStorm.png)
+
 ## Learning event log
 
 ### Event processing should not throw exceptions #eventSourcing
@@ -44,14 +47,25 @@ Then change the const ESDB = require() to var ESDB = require() and add the follo
 
 Yes, getting this mock setup and working correctly has a lot of work and it feels unnecessary.  I'm quite convinced that I will be able to refactor this project to not have to use mocks for I/O utilities like EventStore or Grpc.  Those are well tested and well supported software packages so no need to include them in my unit tests.
 
+## The rest of this section should be pulled into a separate file and linked for those interested in logging, metrics, jmeter, etc.
+
+### grpcurl and app Logging
+I have finished wiring up the controller and routed all the controller methods to the GrpcServer.  I'm now testing the GrpcServer itself using grpcurl (https://github.com/fullstorydev/grpcurl).  This seems to be the most straight forward method of testing gRPC.  I am running into some errors and realize I need some logging output on the nodejs server.  In looking for something familiar it looks like winston is the most log4j like package.  Not sure if that's the right nodejs like pattern to use but coming from the Java world it's what I'm used to so I'll try that first.  
+
 ### <a name="footnotes"></a>Footnotes:
 1. GOTO 2017 • The Many Meanings of Event-Driven Architecture • Martin Fowler - https://www.youtube.com/watch?v=STKCRSUsyP0
 
-### TODOs
-* TODO:  Create a unit test without actually using ESDB to prove out whether it was important to mock it or not
-* TODO:  Duplicate the project and implement a refactor to do it without mocks to compare
-* TODO:  Make all mocks work and allow a command line argument to switch off mocks
+### DEPLOYMENT READY TO INCLUDE ANALYTIC PROJECTIONS TODOs
 * TODO:  Need to add to projections capital gains and short term gains minus fees and commissions
-* TODO:  Do Commissions need to be a separate event from fees paid
 * TODO:  Make sure to understand how to manage events so that no events are lost but also db size is managed
 * TODO:  Make sure security number translations are accounted for (should be)
+* TODO:  Build Security Service for collecting daily unit price of securities
+
+### REFACTOR TODOs
+* TODO:  Document EventStorming
+* TODO:  Document Domain Ubiquitous Language
+* TODO:  Complete C Level Architecture and put some language in the documentation related to C Level
+* TODO:  Create a unit test without actually using ESDB to prove out whether it was important to mock it or not
+* TODO:  Duplicate the project and implement a refactor to do it without mocks to compare
+* TODO:  Do Commissions need to be a separate event from fees paid
+* TODO:  Remove full path from json config so that the proto file is a relative path

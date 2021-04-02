@@ -45,6 +45,8 @@ describe("Test suite for Portfolio", () => {
         const seventhQuantityAdjustment = "200";
         const eighthSecurityId = "PYPL";
         const eighthQuantityAdjustment = "50";
+        const ninthQuantityAdjustment = "300";
+        const tenthQuantityAdjustment = "50";
         const firstFeePaid = "2500";
         const dividend = "30000";
 
@@ -70,12 +72,39 @@ describe("Test suite for Portfolio", () => {
             fifthQuantityAdjustment, fifthCashAmount, settlementDate);
         await portfolio.sellSecurity(portfolioId, secondAccountId, sixthSecurityId, 
             sixthQuantityAdjustment, sixthCashAmount, settlementDate);
+        await portfolio.splitSecurity(portfolioId, secondAccountId, sixthSecurityId, 
+            ninthQuantityAdjustment, settlementDate);
+        await portfolio.consolidateSecurity(portfolioId, secondAccountId, sixthSecurityId, 
+            tenthQuantityAdjustment, settlementDate);
         await portfolio.transferSecurityIn(portfolioId, secondAccountId, seventhSecurityId, 
             seventhQuantityAdjustment, settlementDate);
         await portfolio.transferSecurityOut(portfolioId, secondAccountId, eighthSecurityId, 
             eighthQuantityAdjustment, settlementDate);
+        
+        const firstTransferredInData = {
+            securityId: "AMD",
+            quantity: "200",
+            acquiringSecurityId: "DIS",
+            acquiringQuantity: "100"
+        }
+        await portfolio.transferSecurityIn(portfolioId, secondAccountId, firstTransferredInData.securityId,
+            firstTransferredInData.quantity, settlementDate);
+        await portfolio.mergeSecurity(portfolioId, secondAccountId, firstTransferredInData.securityId,
+                firstTransferredInData.acquiringSecurityId, firstTransferredInData.quantity,
+                firstTransferredInData.acquiringQuantity, settlementDate);
         await portfolio.payFees(portfolioId, firstAccountId, firstFeePaid, settlementDate);
         await portfolio.receiveDividend(portfolioId, firstAccountId, dividend, settlementDate);
+
+        const spinOffData = {
+            securityId: "NVDA",
+            quantity: "300",
+            newSecurityId: "NVDA_NEW",
+            newQuantity: "225"
+        }
+        await portfolio.transferSecurityIn(portfolioId, secondAccountId, spinOffData.securityId,
+            spinOffData.quantity, settlementDate);
+        await portfolio.spinOffSecurity(portfolioId, secondAccountId, spinOffData.securityId,
+            spinOffData.newSecurityId, spinOffData.newQuantity, settlementDate)
 
         const portfolioState = await portfolio.getPortfolioState(portfolioId);
 
@@ -88,7 +117,8 @@ describe("Test suite for Portfolio", () => {
 
         const firstAccountFirstSecurityQuantity = BigInt(firstQuantityAdjustment) + BigInt(secondQuantityAdjustment);
         const firstAccountSecondSecurityQuantity = BigInt(thirdQuantityAdjustment) + BigInt(fifthQuantityAdjustment);
-        const secondAccountFirstSecurityQuantity = BigInt(fourthQuantityAdjustment) - BigInt(sixthQuantityAdjustment);
+        const secondAccountFirstSecurityQuantity = BigInt(fourthQuantityAdjustment) - BigInt(sixthQuantityAdjustment) + 
+                                                    BigInt(ninthQuantityAdjustment) - BigInt(tenthQuantityAdjustment);
         const secondAccountSecondSecurityQuantity = BigInt(seventhQuantityAdjustment) - BigInt(eighthQuantityAdjustment);
 
         expect(portfolioId).toMatch(UUID_REGEX);
@@ -105,6 +135,14 @@ describe("Test suite for Portfolio", () => {
         expect(portfolioState.accounts[1].accountSecurities[0].quantity).toEqual(secondAccountFirstSecurityQuantity.toString());
         expect(portfolioState.accounts[1].accountSecurities[1].securityId).toEqual(seventhSecurityId);
         expect(portfolioState.accounts[1].accountSecurities[1].quantity).toEqual(secondAccountSecondSecurityQuantity.toString());
+        expect(portfolioState.accounts[1].accountSecurities[2].securityId).toEqual(firstTransferredInData.securityId);
+        expect(portfolioState.accounts[1].accountSecurities[2].quantity).toEqual("0");
+        expect(portfolioState.accounts[1].accountSecurities[3].securityId).toEqual(firstTransferredInData.acquiringSecurityId);
+        expect(portfolioState.accounts[1].accountSecurities[3].quantity).toEqual(firstTransferredInData.acquiringQuantity);
+        expect(portfolioState.accounts[1].accountSecurities[4].securityId).toEqual(spinOffData.securityId);
+        expect(portfolioState.accounts[1].accountSecurities[4].quantity).toEqual(spinOffData.quantity);
+        expect(portfolioState.accounts[1].accountSecurities[5].securityId).toEqual(spinOffData.newSecurityId);
+        expect(portfolioState.accounts[1].accountSecurities[5].quantity).toEqual(spinOffData.newQuantity);
     });
 
     test("Test portfolio updates with expectedRevision values", async () => {

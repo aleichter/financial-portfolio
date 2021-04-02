@@ -8,7 +8,10 @@
         "connection" : "esdb://localhost:2113?tls=false",
         "snapshotTrigger" : 100
     },
+    "logging": {
+        "level": "error"
+    },
     "testConfig" : {
-        "unmockAll": false
+        "unmockAll": true
     }
 }
