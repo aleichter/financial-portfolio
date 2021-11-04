@@ -2,11 +2,11 @@ const { set } = require("immutable");
 const PortfolioEventService = require("../service/portfolio-event-service");
 const { accountAdded } = require("../service/portfolio-event-service");
 const Moment = require("moment");
-const PortfolioBuilder = require("../model/portfolio-state-builder");
+const PortfolioBuilder = require("./portfolio-state-builder");
 const { AccountDoesNotExist, 
         InvalidSettlementDate, 
         SecurityDoesNotExistException, 
-        NegativeSecurityQuantityException } = require("../model/exception/domain-exceptions");
+        NegativeSecurityQuantityException } = require("./exception/domain-exceptions");
 
 const validateSettlementDate = (date) => {
     if(!(Moment(date,"MM/DD/YYYY", true).isValid())) {
@@ -71,24 +71,25 @@ class Portfolio {
         return response.nextExpectedRevision;
     }
     async buySecurity(portfolioId, accountId, securityId, quantityAdjustment, cashAdjustment, 
-                        settlementDate, expectedRevision = null) {
+                        commission, fee, settlementDate, expectedRevision = null) {
         validateAccountExists(await this.#eventService.load(portfolioId), accountId);
         validateSettlementDate(settlementDate);        
         const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, 
                                                                     securityId, quantityAdjustment, 
-                                                                    cashAdjustment, settlementDate);
+                                                                    cashAdjustment, commission,
+                                                                    fee, settlementDate);
         const response = await this.#eventService.save(securityBought, expectedRevision);
         return response.nextExpectedRevision;
     }
     async sellSecurity(portfolioId, accountId, securityId, quantityAdjustment, cashAdjustment, 
-                        settlementDate, expectedRevision = null) {
+                        commission, fee, settlementDate, expectedRevision = null) {
         const portfolioState = await this.#eventService.load(portfolioId);
         validateAccountExists(portfolioState, accountId);
         validateSettlementDate(settlementDate);
         validateNegativeSecurityQuantity(portfolioState, accountId, securityId, quantityAdjustment);
         const securitySold = PortfolioEventService.securitySold(portfolioId, accountId, securityId, 
                                                                 quantityAdjustment, cashAdjustment, 
-                                                                settlementDate);
+                                                                commission, fee, settlementDate);
         const response = await this.#eventService.save(securitySold, expectedRevision);
         return response.nextExpectedRevision;
     }

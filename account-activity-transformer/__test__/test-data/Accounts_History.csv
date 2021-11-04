@@ -1,0 +1,30 @@
+
+
+
+Brokerage
+
+Run Date,Account,Action,Symbol,Security Description,Security Type,Quantity,Price ($),Commission ($),Fees ($),Accrued Interest ($),Amount ($),Settlement Date
+ 04/01/2021,INDIVIDUAL - TOD X70744875, YOU BOUGHT ADVANCED MICRO DEVICES INC (AMD) (Cash), AMD, ADVANCED MICRO DEVICES INC,Cash,49,81.01,,,,-3969.46,04/06/2021
+ 03/31/2021,INDIVIDUAL - TOD X70744875, REINVESTMENT CASH (315994103) (Cash), 315994103, CASH,Cash,0.04,1,,,,-0.04,
+ 03/31/2021,INDIVIDUAL - TOD X70744875, INTEREST EARNED CASH (315994103) (Cash), 315994103, CASH,Cash,,,,,,0.04,
+ 03/26/2021,INDIVIDUAL - TOD X70744875, DIVIDEND RECEIVED GLOBAL PAYMENTS INC (GPN) (Cash), GPN, GLOBAL PAYMENTS INC,Cash,,,,,,25.94,
+ 03/18/2021,INDIVIDUAL - TOD X70744875, YOU BOUGHT DROPBOX INC CL A (DBX) (Cash), DBX, DROPBOX INC CL A,Cash,180,27.8,,,,-5003.1,03/22/2021
+ 03/18/2021,INDIVIDUAL - TOD X70744875, YOU BOUGHT DISNEY WALT CO COM (DIS) (Cash), DIS, DISNEY WALT CO COM,Cash,25,193.63,,,,-4840.66,03/22/2021
+ 03/18/2021,INDIVIDUAL - TOD X70744875, Electronic Funds Transfer Paid (Cash), , No Description,Cash,,,,,,-10000,
+ 03/16/2021,INDIVIDUAL - TOD X70744875, YOU SOLD GLOBAL PAYMENTS INC (GPN) (Cash), GPN, GLOBAL PAYMENTS INC,Cash,-133,212.8,4.95,0.15,,28297.3,03/18/2021
+
+
+
+
+
+"The data and information in this spreadsheet is provided to you solely for your use and is not for distribution. The spreadsheet is provided for"
+"informational purposes only, and is not intended to provide advice, nor should it be construed as an offer to sell, a solicitation of an offer to buy or a"
+"recommendation for any security or insurance product by Fidelity or any third party. Data and information shown is based on information known to Fidelity as of the date it was"
+"exported and is subject to change. It should not be used in place of your account statements or trade confirmations and is not intended for tax reporting"
+"purposes. For more information on the data included in this spreadsheet, including any limitations thereof, go to Fidelity.com."
+
+"Brokerage services are provided by Fidelity Brokerage Services LLC, 900 Salem Street, Smithfield, RI 02917. Custody and other services provided by National"
+"Financial Services LLC. Both are Fidelity Investment companies and members SIPC, NYSE. Insurance products at Fidelity are distributed by"
+"Fidelity Insurance Agency, Inc., and, for certain products, by Fidelity Brokerage Services, Member NYSE, SIPC."
+
+"Date downloaded" 04/02/2021, 9:43 AM

@@ -9,7 +9,7 @@
         "snapshotTrigger" : 100
     },
     "logger": {
-        "level": "info"
+        "level": "debug"
     },
     "testConfig" : {
         "unmockAll": true

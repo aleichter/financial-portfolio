@@ -61,13 +61,19 @@ class PortfolioBuilder {
 
     static AccountBuilder = class Account {
         static build(accountId, accountNumber) {
-            return Map({accountId: accountId, accountNumber: accountNumber, cashAmount: "0", accountSecurities: List([])});
+            return Map({accountId: accountId, accountNumber: accountNumber, cashAmount: "0", totalCommissions: "0", totalFees: "0", accountSecurities: List([])});
         }
         static getAccountSecurity(account, securityId) {
             return Map(Seq(account.get("accountSecurities")).filter(a => a.get("securityId") === securityId).get(0));
         }
         static updateCashAmount(account, cashAmount) {
             return account.merge({ cashAmount: cashAmount });
+        }
+        static updateTotalCommissionsAmount(account, totalCommissions) {
+            return account.merge({ totalCommissions: totalCommissions });
+        }
+        static updateTotalFeesAmount(account, totalFees) {
+            return account.merge({ totalFees: totalFees });
         }
         static updateOrAddAccountSecurity(account, accountSecurity) {
             const accountSecurities = account.get("accountSecurities")

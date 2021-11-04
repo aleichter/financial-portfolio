@@ -79,7 +79,8 @@ exports.receiveDividend = async (request) => {
 exports.buySecurity = async (request) => {
     const response = await portfolio.buySecurity(request.portfolioId, request.accountId, 
                                                     request.securityId, request.quantityAdjustment, 
-                                                    request.cashAdjustment, request.settlementDate, 
+                                                    request.cashAdjustment, request.commission,
+                                                    request.fee, request.settlementDate, 
                                                     request.expectedRevision);
     return {
         nextExpectedRevision: response.toString()
@@ -89,7 +90,8 @@ exports.buySecurity = async (request) => {
 exports.sellSecurity = async (request) => {
     const response = await portfolio.sellSecurity(request.portfolioId, request.accountId, 
                                                     request.securityId, request.quantityAdjustment, 
-                                                    request.cashAdjustment, request.settlementDate, 
+                                                    request.cashAdjustment, request.commission,
+                                                    request.fee, request.settlementDate, 
                                                     request.expectedRevision);
     return {
         nextExpectedRevision: response.toString()

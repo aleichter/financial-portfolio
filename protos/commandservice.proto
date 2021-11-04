@@ -60,9 +60,11 @@ message SecurityCashAdjustmentRequest {
     string accountId = 2;
     string securityId = 3;
     string cashAdjustment = 4;
-    string quantityAdjustment = 5;
-    string settlementDate = 6;
-    string expectedRevision = 7;
+    string commission = 5;
+    string fee = 6;
+    string quantityAdjustment = 7;
+    string settlementDate = 8;
+    string expectedRevision = 9;
 }
 
 message SecurityAdjustmentRequest {

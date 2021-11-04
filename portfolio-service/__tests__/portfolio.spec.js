@@ -61,17 +61,17 @@ describe("Test suite for Portfolio", () => {
         await portfolio.depositCash(portfolioId, secondAccountId, secondAccountCashDeposit, settlementDate);
         await portfolio.withdrawCash(portfolioId, secondAccountId, secondAccountCashWithdraw, settlementDate);
         await portfolio.buySecurity(portfolioId, firstAccountId, firstSecurityId, 
-            firstQuantityAdjustment, firstCashAmount, settlementDate);
+            firstQuantityAdjustment, firstCashAmount, "0", "0", settlementDate);
         await portfolio.buySecurity(portfolioId, firstAccountId, secondSecurityId, 
-            secondQuantityAdjustment, secondCashAmount, settlementDate);
+            secondQuantityAdjustment, secondCashAmount, "0","0", settlementDate);
         await portfolio.buySecurity(portfolioId, firstAccountId, thirdSecurityId, 
-            thirdQuantityAdjustment, thirdCashAmount, settlementDate);
+            thirdQuantityAdjustment, thirdCashAmount, "0","0",settlementDate);
         await portfolio.buySecurity(portfolioId, secondAccountId, fourthSecurityId, 
-            fourthQuantityAdjustment, fourthCashAmount, settlementDate);
+            fourthQuantityAdjustment, fourthCashAmount, "0", "0", settlementDate);
         await portfolio.buySecurity(portfolioId, firstAccountId, fifthSecurityId, 
-            fifthQuantityAdjustment, fifthCashAmount, settlementDate);
+            fifthQuantityAdjustment, fifthCashAmount, "0", "0", settlementDate);
         await portfolio.sellSecurity(portfolioId, secondAccountId, sixthSecurityId, 
-            sixthQuantityAdjustment, sixthCashAmount, settlementDate);
+            sixthQuantityAdjustment, sixthCashAmount,"0", "0", settlementDate);
         await portfolio.splitSecurity(portfolioId, secondAccountId, sixthSecurityId, 
             ninthQuantityAdjustment, settlementDate);
         await portfolio.consolidateSecurity(portfolioId, secondAccountId, sixthSecurityId, 
@@ -177,12 +177,12 @@ describe("Test suite for Portfolio", () => {
         const firstSecurityQuantity = "100";
         const firstSecurityCost = "1000000";
         const buySecurityNextRevision = await portfolio.buySecurity(portfolioId, 
-            addFirstAccountResponse.accountId, firstSecurityId, firstSecurityQuantity, firstSecurityCost, 
+            addFirstAccountResponse.accountId, firstSecurityId, firstSecurityQuantity, firstSecurityCost, "0", "0",
             settlementDate, dividendNextRevision);
         const firstSecuritySaleQuantity = "50";
         const firstSecuritySaleCost = "500000";
         const sellSecurityNextRevision = await portfolio.sellSecurity(portfolioId, 
-            addFirstAccountResponse.accountId, firstSecurityId, firstSecuritySaleQuantity, firstSecuritySaleCost, 
+            addFirstAccountResponse.accountId, firstSecurityId, firstSecuritySaleQuantity, firstSecuritySaleCost, "0", "0",
             settlementDate, buySecurityNextRevision);
         const firstSecurityIdTransferIn = "MSFT";
         const firstSecurityIdTransferInQuantity = "200";
@@ -225,7 +225,7 @@ describe("Test suite for Portfolio", () => {
         const firstAccountId = (await portfolio.addAccount(portfolioId, firstAccountNumber)).accountId;
 
         await expect(portfolio.sellSecurity(portfolioId, firstAccountId, securityId, 
-            quantityAdjustment, cashAmount, settlementDate))
+            quantityAdjustment, cashAmount, "0", "0", settlementDate))
             .rejects.toThrow(SecurityDoesNotExistException);
         
         await expect(portfolio.transferSecurityOut(portfolioId, firstAccountId, securityId, 
@@ -234,10 +234,10 @@ describe("Test suite for Portfolio", () => {
 
         await portfolio.depositCash(portfolioId, firstAccountId, firstAccountCashDeposit, settlementDate);
         await portfolio.buySecurity(portfolioId, firstAccountId, securityId, quantityAdjustment, 
-            cashAmount, settlementDate);
+            cashAmount, "0","0", settlementDate);
         
         await expect(portfolio.sellSecurity(portfolioId, firstAccountId, securityId, 
-            saleQuantityAdjustment, cashAmount, settlementDate))
+            saleQuantityAdjustment, cashAmount, "0", "0", settlementDate))
             .rejects.toThrow(NegativeSecurityQuantityException);
 
         await expect(portfolio.transferSecurityOut(portfolioId, firstAccountId, 
@@ -285,17 +285,17 @@ describe("Test suite for Portfolio", () => {
             .rejects.toThrow(WrongExpectedVersion);
         
         await expect(portfolio.buySecurity(portfolioId, firstAccountId, "XYZ", "100", 
-            "100000", "01/01/2020", previousExpectedRevision))
+            "100000", "0", "0", "01/01/2020", previousExpectedRevision))
             .rejects.toThrow(WrongExpectedVersion);
 
         await expect(portfolio.transferSecurityIn(portfolioId, firstAccountId, "XYZ", 
             "100", "01/01/2020", previousExpectedRevision))
             .rejects.toThrow(WrongExpectedVersion);
 
-        await portfolio.buySecurity(portfolioId, firstAccountId, "APPL", "1000", "10000000", "03/21/2021");
+        await portfolio.buySecurity(portfolioId, firstAccountId, "APPL", "1000", "10000000", "0","0","03/21/2021");
 
         await expect(portfolio.sellSecurity(portfolioId, firstAccountId, "APPL", "100", 
-            "100000", "01/01/2020", previousExpectedRevision))
+            "100000", "0", "0", "01/01/2020", previousExpectedRevision))
             .rejects.toThrow(WrongExpectedVersion);
 
         await expect(portfolio.transferSecurityOut(portfolioId, firstAccountId, "APPL", 
@@ -338,7 +338,7 @@ describe("Test suite for Portfolio", () => {
             .rejects.toThrow(AccountDoesNotExist);
         
         await expect(portfolio.buySecurity(portfolioId, badAccountId, "XYZ", "100", 
-            "100000", "01/01/2020", previousExpectedRevision))
+            "100000", "0","0","01/01/2020", previousExpectedRevision))
             .rejects.toThrow(AccountDoesNotExist);
 
         await expect(portfolio.transferSecurityIn(portfolioId, badAccountId, "XYZ", 
@@ -346,7 +346,7 @@ describe("Test suite for Portfolio", () => {
             .rejects.toThrow(AccountDoesNotExist);
 
         await expect(portfolio.sellSecurity(portfolioId, badAccountId, "APPL", "100", 
-            "100000", "01/01/2020", previousExpectedRevision))
+            "100000", "0", "0", "01/01/2020", previousExpectedRevision))
             .rejects.toThrow(AccountDoesNotExist);
 
         await expect(portfolio.transferSecurityOut(portfolioId, badAccountId, "APPL", 

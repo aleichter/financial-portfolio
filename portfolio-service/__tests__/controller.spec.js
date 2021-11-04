@@ -114,6 +114,8 @@ describe("Test suite for portfolio-controller", () => {
             securityId: "MSFT",
             quantityAdjustment: "100",
             cashAdjustment: "2000000",
+            commission: "0",
+            fee: "0",
             settlementDate: "03/28/2021",
             expectedRevision: cashDepositResponse.nextExpectedRevision 
         });
@@ -123,6 +125,8 @@ describe("Test suite for portfolio-controller", () => {
             securityId: "MSFT",
             quantityAdjustment: "50",
             cashAdjustment: "1000000",
+            commission: "10000",
+            fee: "1000",
             settlementDate: "03/28/2021",
             expectedRevision: buySecurityResponse.nextExpectedRevision 
         });

@@ -164,7 +164,7 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount);
+        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount,"0","0");
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
@@ -192,8 +192,8 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityBought1 = PortfolioEventService.securityBought(portfolioId, accountId, securityId1, quantity1, cashAmount1);
-        const securityBought2 = PortfolioEventService.securityBought(portfolioId, accountId, securityId2, quantity2, cashAmount2);
+        const securityBought1 = PortfolioEventService.securityBought(portfolioId, accountId, securityId1, quantity1, cashAmount1,"0","0");
+        const securityBought2 = PortfolioEventService.securityBought(portfolioId, accountId, securityId2, quantity2, cashAmount2,"0");
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
@@ -223,8 +223,8 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount);
-        const securitySold = PortfolioEventService.securitySold(portfolioId, accountId, securityId, quantitySold, cashAmountSold);
+        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount,"0","0");
+        const securitySold = PortfolioEventService.securitySold(portfolioId, accountId, securityId, quantitySold, cashAmountSold,"0","0");
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
@@ -326,8 +326,8 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount);
-        const securityBoughtAdditional = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantityAdditional, cashAmountAdditional);
+        const securityBought = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantity, cashAmount,"0","0");
+        const securityBoughtAdditional = PortfolioEventService.securityBought(portfolioId, accountId, securityId, quantityAdditional, cashAmountAdditional,"0","0");
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
@@ -353,7 +353,7 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const portfolioId = createdEvent.get("portfolioId");
         const accountAdded = PortfolioEventService.accountAdded(portfolioId, accountNumber);
         const accountId = accountAdded.get('accountId');
-        const securitySold = PortfolioEventService.securitySold(portfolioId, accountId, securityId, quantitySold, cashAmountSold);
+        const securitySold = PortfolioEventService.securitySold(portfolioId, accountId, securityId, quantitySold, cashAmountSold,"0","0");
 
         const dbclient = new ESDB("esdb://localhost:2113?tls=false");
         const eventService = new PortfolioEventService(dbclient);
@@ -408,7 +408,7 @@ describe("Test suite for PortolioEventService and event processor", () => {
         const accountId = accountAddedEvent.get('accountId');
         const cashDepositedEvent = PortfolioEventService.cashDeposited(portfolioId, accountId, cashAmountDeposited);
         const cashWithdrawnEvent = PortfolioEventService.cashWithdrawn(portfolioId, accountId, cashAmountWithdrawn);
-        const securityBoughtEvent = PortfolioEventService.securityBought(portfolioId, accountId, "APPL", "100", "1000000", "03/28/2021");
+        const securityBoughtEvent = PortfolioEventService.securityBought(portfolioId, accountId, "APPL", "100", "1000000","0","0", "03/28/2021");
 
         const events = [
             eventFormat(portfolioCreatedEvent.toJS(), 0n), 

@@ -39,6 +39,18 @@ const addCash = (portfolio, accountId, cashAmount) => {
     return PortfolioBuilder.AccountBuilder.updateCashAmount(account, newCashAmount.toString());
 }
 
+const addCommission = (portfolio, accountId, commission) => {
+    const account = PortfolioBuilder.getAccount(portfolio, accountId);
+    const newTotalCommissions = BigInt(account.get("totalCommissions")) + BigInt(commission);
+    return PortfolioBuilder.AccountBuilder.updateTotalCommissionsAmount(account, newTotalCommissions.toString());
+}
+
+const addFee = (portfolio, accountId, fee) => {
+    const account = PortfolioBuilder.getAccount(portfolio, accountId);
+    const newTotalFees = BigInt(account.get("totalFees")) + BigInt(fee);
+    return PortfolioBuilder.AccountBuilder.updateTotalFeesAmount(account, newTotalFees.toString());
+}
+
 const subtractCash = (portfolio, accountId, cashAmount) => {
     const account = PortfolioBuilder.getAccount(portfolio, accountId);
     const newCashAmount = BigInt(account.get("cashAmount")) - BigInt(cashAmount);
@@ -91,6 +103,18 @@ exports.apply = (accum, event) => {
             var account = PortfolioBuilder.getAccount(portfolioState, event.event.data.accountId);
             var security = PortfolioBuilder.AccountBuilder.getAccountSecurity(account, event.event.data.securityId);
             var updatedAccount = addCash(portfolioState, event.event.data.accountId, event.event.data.cashAmount);
+            portfolioState = PortfolioBuilder.updateOrAddAccount(portfolioState, updatedAccount);
+            updatedAccount = addFee(
+                portfolioState,
+                event.event.data.accountId,
+                event.event.data.fee
+            );
+            portfolioState = PortfolioBuilder.updateOrAddAccount(portfolioState, updatedAccount);
+            updatedAccount =  addCommission(
+                portfolioState,
+                event.event.data.accountId,
+                event.event.data.commission
+            );
             if(security.get("securityId") == null) {
                 security = PortfolioBuilder.AccountSecurityBuilder.build(event.event.data.securityId, 0);
                 updatedAccount = PortfolioBuilder.AccountBuilder.updateOrAddAccountSecurity(updatedAccount, security);

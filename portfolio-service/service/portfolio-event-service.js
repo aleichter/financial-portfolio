@@ -101,12 +101,12 @@ class PortfolioEventService {
         return Map({ portfolioId: portfolioId, accountId: accountId, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.FEES_PAID });
     }
 
-    static securityBought(portfolioId, accountId, securityId, quantity, cashAmount, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_BOUGHT });
+    static securityBought(portfolioId, accountId, securityId, quantity, cashAmount, commission, fee, settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, commission: commission, fee: fee, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_BOUGHT });
     }
 
-    static securitySold(portfolioId, accountId, securityId, quantity, cashAmount, settlementDate) {
-        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SOLD });
+    static securitySold(portfolioId, accountId, securityId, quantity, cashAmount, commission, fee,  settlementDate) {
+        return Map({ portfolioId: portfolioId, accountId: accountId, securityId, quantity: quantity, cashAmount: cashAmount, commission: commission, fee: fee, settlementDate: settlementDate, eventType: EVENT_TYPE.SECURITY_SOLD });
     }
 
     static securityTransferredIn(portfolioId, accountId, securityId, quantity, settlementDate) {
