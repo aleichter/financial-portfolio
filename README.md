@@ -1,7 +1,15 @@
 # A learning event log for EventSourcing and EventStore
 ## Motivation
-At some point over the last two years I became fascinated with EventSourcing.  It started with a talk from Martin Fowler that I watched while doing research on Event Driven Architecture in preparation for a heavy transaction based project. [<sup>1</sup>](#footnotes) Based on this talk I 
- Additionally learning Domain Driven Design (DDD) EventSourcing, Command Query Responsibility Segregation (CQRS), Test Driven Development (TDD), Immutables and EventStore
+At some point over the last two years I became fascinated with EventSourcing.  It started with a talk from Martin Fowler that I watched while doing research on Event Driven Architecture in preparation for a heavy transaction based project. [<sup>1</sup>](#footnotes) This repo is to document my own journey that started with EventSourcing but expanded to multiple tangents that cover a wide variety of topics including:  EventSourcing, EventStore (https://www.eventstore.com/), Domain Driven Design (DDD), Event Storming, Command Query Responsibility Segregation (CQRS), Test Driven Development (TDD), Immutables, NodeJs, TypeScript, gRPC, Envoy, Keycloak, and more.
+
+## Projects
+financial-portfolio - parent project
+|-> doc - supplemental documents used in this README file.  (e.g. drawio diagrams, etc.)
+|-> envoy - yaml files for envoy configurations
+|-> financial-portfolio-react-ui - the react ui
+|-> jmeter - jmeter scripts used for load testing and validating load testing a gRPC endpoint
+|-> portfolio-service - this is the primary service of the example application
+|-> protos - storing the shared proto-buffers for use by gRCP clients and servers in child-projects
 
 
 ## The Business Problem
@@ -56,7 +64,7 @@ Yes, getting this mock setup and working correctly has a lot of work and it feel
 ### Verify Unique Investors
 4.24.2021 - I love event sourcing and I'm really digging the event store.  Where it does pose a bit more of a challenge over an RDBMS is when trying to solve a unique constraint.  Specifically when you are trying to create a unique identifier for an Investor (in our current business case).  You could create a stream naming pattern that uses email address.  For example user_andrew@fakeemail.com and then when a new Investor account is created you check for the no_stream expectedRevision so you will get an error if it exists.  I don't want to use email address as email addresses can change and I sometimes find it convenient to have multiple system accounts linked to the same email address.  I see two options.  1) Create a unique uuid for each account.  On account creation create a stream with the uuid e.g. user_<uuid>.  Create a projection into a cache (e.g. redis) that looks up the uuid via username.  When accounts are created lookup into the cache to see if the username is unique.  This would allow the event store to hold a stream without having to migrate to a new stream on username change.  This is more complexity then I want to deal with right now so I'm going to go with option two.  2) Just have the user select a unique username (duh).  Then you get stream_<username> and don't allow them to change it or accept the technical hit of migrating to a new stream should it change (you would have to migrate all events to the new stream and, if you store a username reference in the portfolio aggregate you would have to update those references as well).
 
-### I know I should this already be obvious but... start with the UI
+### I know this should already be obvious but... start with the UI
 4.24.2021 - My point is really to start with the most public API as some teams can't start with the UI if they are not a UI team but since I'm doing this whole thing myself the most public interface is the UI since I should have started there at the start I'm going to go ahead and start there now.  Long terms, as with everything else I'm doing here, I will implement multiple versions of the UI for comparison.  React, Angular, and maybe Blazor (might give me an opportunity to flex my long dormant C# muscles.  I do miss C#).
 
 ### Authentication and Auth0
@@ -64,6 +72,13 @@ Yes, getting this mock setup and working correctly has a lot of work and it feel
 
 ### SMTP relay server
 5.1.2021 - I want to go ahead and configure keycloak to SMTP in order to use the registration and verification features.  Keycloak provides everything you need out of the box for authentication and authorization management so I'm going to stick with using the keycloak ui for all things security.  SMTP is needed to complete the full experience.  I'm not interested in running my own SMTP server so I'm going to use a relay server.  After a bit of research I like sendgrid.net.  100 emails a day for the free account and the setup was relatively easy.  My isp blocks port 25 so sendgrid.net offers additional port both un-secure and secure protocols which allowed me to get this setup relatively quickly.  I'm going to need to come up with an appropriate secrets and configuration strategy (I'm assuming via Hashicorp vault for the secrets) as I don't want to commit the keys for send grid or my account details to the github.  I will need to merge those values at runtime.  If I was running this on K8 it would be easy to use that secrets vault but I don't want to introduce the K8 infrastructure at this time.  As this is a learning exercise that I hope others can use I will stick to docker.  
+
+### Refactoring to TypeScript
+11.4.2021 - I now have some professional experience with TypeScript via Angular and I realize how challenging plain 'ole JavaScript can be.  The dynamic types in JavaScript available is powerful but if you want to make sure that your code is expressive enough for the next engineer (who might be you a few months in the future) it makes it difficult to fully understand intentions.  Statically typed languages offer much more readability and maintainability so I've come to appreciate TypeScript.  In this refactoring I've done some research to ensure I understand some best practices around utilizing TypeScript for a nodejs project.  Primarily how to ensure jest will work as intended with ts-jest and the value of linting via eslint.  I've also included husky in the toolset to ensure linting is hooked into the git pipeline.  I have created a new project; portfolio-service-ts and renamed portfolio-service-js to keep the javascript version. Here are a few good articles which provided some guidance: https://levelup.gitconnected.com/node-typescript-mocha-eslint-efad2e3d2943 and https://blog.risingstack.com/building-a-node-js-app-with-typescript-tutorial/
+
+### Holy Crap! Where has this javascript linting been! (It's been there.  I've just been tied up in Java)
+11.4.2021 - If you come from a statically typed language background then a lot of what linting in the javascript world does for you has just been there in your IDE.  Indention enforcement, code conventions, are styles you can configure in your Java/C# IDE.  Should we have been using linting in Java?  Maybe so.  This would ensure coding style standards are embedded in the build pipeline but it is not typically a huge problem.  With JavaScript and even TypeScript it can be a huge problem.  Thus linting is absolutely necessary in group projects.  Airbnb actually publishes their eslint rules to github (https://github.com/airbnb/javascript).  I'm going to use the airbnb lint styles in my project.  While I think this coding standard is primarily for their frontend code I see nothing that prevents it from being utilized for backend services.  Here is my first lint run: ![Lint Output](doc/images/eslint.png)  You can see over 4,000 problems but let's run it again with --fix.  You can see most of these problems are CRLF expected but found LF (something in vscode maybe?) but there are also some indention preferences for 4 spaces instead of 8 (again my vscode setup?).  Here is after running with --fix: ![Lint Fix Output](doc/images/eslint-fix.png)
+Down to 300+ which I expected as I have not completed my conversion from JavaScript to TypeScript so we'll do that first and then run this again.
 
 ## The rest of this section should be pulled into a separate file and linked for those interested in logging, metrics, jmeter, etc.
 
@@ -78,8 +93,10 @@ I have finished wiring up the controller and routed all the controller methods t
 * TODO:  Make sure to understand how to manage events so that no events are lost but also db size is managed
 * TODO:  Make sure security number translations are accounted for (should be)
 * TODO:  Build Security Service for collecting daily unit price of securities
+* TODO:  Consolidate all the links in the README to the footnotes
 
 ### REFACTOR TODOs
+* TODO: REFACTOR THE WHOLE THING IN TYPESCRIPT YA DUMMY.  Without this I cannot really implement the Either pattern for exception expressiveness
 * TODO:  Document EventStorming
 * TODO:  Document Domain Ubiquitous Language
 * TODO:  Complete C Level Architecture and put some language in the documentation related to C Level

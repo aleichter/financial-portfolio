@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package unit;
+
+service TestService1 {
+    rpc TestCommand (TestPayload1) returns (TestResponse) {}
+}
+
+service TestService2 {
+    rpc TestCommand (TestPayload2) returns (TestResponse) {}
+}
+
+service TestService3 {
+    rpc TestCommand (TestPayload2) returns (TestResponse) {}
+}
+
+service TestService4 {
+    rpc TestCommand (TestPayload1) returns (TestResponse) {}
+}
+
+message TestPayload1 {
+    string id = 1;
+}
+
+message TestPayload2 {
+    string id = 1;
+    string message = 2;
+}
+
+message TestResponse {
+    message Data {
+        string key = 1;
+        string value = 2;
+    }
+    repeated Data data = 3;
+}

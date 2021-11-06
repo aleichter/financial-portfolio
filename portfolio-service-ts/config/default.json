@@ -1,0 +1,17 @@
+{
+    "grpcConfig" : {
+        "bindAddress" : "127.0.0.1",
+        "port" : "3000",
+        "proto" : "/Users/andrew/git/financial-portfolio/protos/commandservice.proto"
+    },
+    "esdbConfig" : {
+        "connection" : "esdb://localhost:2113?tls=false",
+        "snapshotTrigger" : 100
+    },
+    "logger": {
+        "level": "debug"
+    },
+    "testConfig" : {
+        "unmockAll": true
+    }
+}
