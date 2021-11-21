@@ -1,5 +1,7 @@
+/* eslint-disable no-undef */
+import GrpcServer from '../src/api/grpc-server';
+
 const GrpcClient = require('../src/api/grpc-client');
-import { GrpcServer } from '../src/api/grpc-server';
 
 const grpcConfig = {
   bindAddress: '0.0.0.0',
@@ -18,17 +20,16 @@ const serverSetup = () => {
     return { data: [{ key: 'id', value: 201 }] };
   };
 
-  const TestCommand2 = (payload:any) => new Promise((resolve, reject) => {
+  const TestCommand2 = (payload:any) => new Promise((resolve) => {
     records.push(payload);
     resolve({ data: [{ key: 'id', value: 301 }] });
   });
   const TestCommand3 = (payload:any) => new Promise((resolve, reject) => {
-    reject('Exception Thrown');
+    reject(new Error(`Exception Thrown with payload ${JSON.stringify(payload)}`));
   });
 
   const TestCommand4 = (payload:any) => {
-    // return {data: null}
-    throw 'Test Exception';
+    throw new Error(`Test Exception with payload ${JSON.stringify(payload)}`);
   };
 
   const routeMap = {
@@ -107,7 +108,7 @@ describe('Test grpc server with promise and non-promise callbacks', () => {
     const api = new GrpcServer(protopath, host, port);
     await api.start();
     const response = { data: [{ key: 'message', value: 'message 1' }] };
-    api.route('unit', 'TestService1', 'TestCommand', (payload) => response);
+    api.route('unit', 'TestService1', 'TestCommand', () => response);
 
     const client = new GrpcClient(grpcConfig.proto, grpcConfig.bindAddress, grpcConfig.port, 'TestService1');
     const executeResponse = await client.execute('TestCommand', {

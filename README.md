@@ -1,6 +1,6 @@
 # A learning event log for EventSourcing and EventStore
 ## Motivation
-At some point over the last two years I became fascinated with EventSourcing.  It started with a talk from Martin Fowler that I watched while doing research on Event Driven Architecture in preparation for a heavy transaction based project. [<sup>1</sup>](#footnotes) This repo is to document my own journey that started with EventSourcing but expanded to multiple tangents that cover a wide variety of topics including:  EventSourcing, EventStore (https://www.eventstore.com/), Domain Driven Design (DDD), Event Storming, Command Query Responsibility Segregation (CQRS), Test Driven Development (TDD), Immutables, NodeJs, TypeScript, gRPC, Envoy, Keycloak, and more.
+At some point in 2020 I became fascinated with EventSourcing.  It started with a talk from Martin Fowler that I watched while doing research on Event Driven Architecture in preparation for a heavy transaction based project. [<sup>1</sup>](#footnotes) This repo is to document my own journey that started with EventSourcing but expanded to multiple tangents that cover a wide variety of topics including:  EventSourcing, EventStore (https://www.eventstore.com/), Domain Driven Design (DDD), Event Storming, Command Query Responsibility Segregation (CQRS), Test Driven Development (TDD), Immutables, NodeJs, TypeScript, gRPC, Envoy, Keycloak, and more.
 
 ## Projects
 financial-portfolio - parent project
@@ -8,7 +8,8 @@ financial-portfolio - parent project
 |-> envoy - yaml files for envoy configurations
 |-> financial-portfolio-react-ui - the react ui
 |-> jmeter - jmeter scripts used for load testing and validating load testing a gRPC endpoint
-|-> portfolio-service - this is the primary service of the example application
+|-> portfolio-service-js - javascript service
+|-> portfolio-service-ts - typescript service
 |-> protos - storing the shared proto-buffers for use by gRCP clients and servers in child-projects
 
 

@@ -1,13 +1,14 @@
-const config = require('config');
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+import appConfig from '../config/appConfig';
+
 let ESDB = require('../src/db/esdb.js');
 const { WrongExpectedVersion } = require('../src/model/exception/domain-exceptions');
 
 jest.mock('../src/db/esdb');
-if (config.hasOwnProperty('testConfig') && config.testConfig.hasOwnProperty('unmockAll') && config.testConfig.unmockAll) {
+if (appConfig.testConfig.unmockAll) {
   ESDB = jest.requireActual('../src/db/esdb');
 }
-
-const isPromise = (promise) => !!promise && typeof promise.then === 'function';
 
 describe('Test suite for the ESDB module', () => {
   let dbClient = null;
@@ -110,12 +111,12 @@ describe('Test suite for the ESDB module', () => {
       await dbClient.appendToStream(stream, data2, type);
     };
 
-    const subscribe = async () => new Promise((resolve, reject) => {
+    const subscribe = async () => new Promise((resolve) => {
       let x = 0;
       const s = dbClient.subscribeToAll();
-      s.on('data', (event) => {
+      s.on('data', () => {
         x += 1;
-        if (x == 4) {
+        if (x === 4) {
           s.unsubscribe();
           resolve(true);
         }
@@ -148,12 +149,12 @@ describe('Test suite for the ESDB module', () => {
       await dbClient.appendToStream(stream, data2, type);
     };
 
-    const subscribe = async (stream) => new Promise((resolve, reject) => {
+    const subscribe = async (stream) => new Promise((resolve) => {
       let x = 0;
       const s = dbClient.subscribeToStream(stream);
-      s.on('data', (event) => {
+      s.on('data', () => {
         x += 1;
-        if (x == 2) {
+        if (x === 2) {
           s.unsubscribe();
           resolve(true);
         }

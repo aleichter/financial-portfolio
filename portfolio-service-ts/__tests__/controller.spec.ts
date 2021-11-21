@@ -1,4 +1,5 @@
-import config from 'config';
+/* eslint-disable no-undef */
+import appConfig from '../config/appConfig';
 
 let ESDB = require('../src/db/esdb.js');
 
@@ -16,7 +17,8 @@ const {
 const UUID_REGEX = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$');
 
 jest.mock('../src/db/esdb');
-if (config.hasOwnProperty('testConfig') && config.testConfig.hasOwnProperty('unmockAll') && config.testConfig.unmockAll) {
+if (appConfig.testConfig.unmockAll) {
+  // eslint-disable-next-line no-unused-vars
   ESDB = jest.requireActual('../src/db/esdb');
 }
 
@@ -181,7 +183,7 @@ describe('Test suite for portfolio-controller', () => {
       settlementDate: '03/28/2021',
       expectedRevision: consolidateSecurityResponse.nextExpectedRevision,
     });
-    const spinOffSecurityResponse = await spinOffSecurity({
+    await spinOffSecurity({
       portfolioId: createResponse.portfolioId,
       accountId: addAccountResponse.accountId,
       existingSecurityId: 'DIS_ACQUIRER',

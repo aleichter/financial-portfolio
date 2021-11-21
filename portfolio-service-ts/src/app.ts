@@ -1,6 +1,5 @@
-import appConfig from '../config/appConfig.js';
-import { GrpcConfigProxy } from '../config/config.proxies.js';
-import GrpcServer from './api/grpc-server.js';
+import appConfig from '../config/appConfig';
+import GrpcServer from './api/grpc-server';
 import {
   getPortfolioState,
   createPortfolio,
@@ -17,7 +16,7 @@ import {
 } from './controller/portfolio-controller';
 
 function main(): void {
-  const grpcConfig:GrpcConfigProxy = appConfig.grpcConfig;
+  const { grpcConfig } = appConfig;
 
   const api:GrpcServer = new GrpcServer(grpcConfig.proto, grpcConfig.bindAddress, grpcConfig.port);
   api.route('portfolio', 'PortfolioService', 'GetPortfolioState', getPortfolioState);
