@@ -13,7 +13,7 @@
 (defn simple-body-page [req]
   {:status  200
    :headers {"Content-Type" "text/html"}
-   :body (str (json/write-str {:message "Hello, World!"}))})
+   :body (str (json/write-str {:message "Hello, Tilt"}))})
 
 (defroutes app-routes
   (GET "/" [] simple-body-page)

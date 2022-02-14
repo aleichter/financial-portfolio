@@ -1,0 +1,3 @@
+docker_build("docker.io/aleichter/portfolio-service", ".")
+k8s_yaml("portfolio-service.yml")
+k8s_resource("portfolio-deployment",port_forwards=8080)
